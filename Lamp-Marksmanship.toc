@@ -1,0 +1,12 @@
+## Interface: 100207
+
+## Title: Lamp-Marksmanship
+## Author: ME
+## Version: 1.0
+## Notes: Custom Marksmanship rotation for Auratimers.
+
+## DefaultState: Enabled
+
+Lamp-Marksmanship.lua
+
+
