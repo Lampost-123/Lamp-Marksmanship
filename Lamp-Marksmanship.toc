@@ -3,7 +3,7 @@
 ## Title: Lamp-Marksmanship
 ## Author: ME
 ## Version: 1.0
-## Notes: Custom Marksmanship rotation for Auratimers.
+## Notes:
 
 ## DefaultState: Enabled
 
