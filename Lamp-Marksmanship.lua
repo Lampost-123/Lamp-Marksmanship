@@ -27,14 +27,11 @@ local function MyRoutine()
 	local AoEON = MainAddon.AoEON
 	local CDsON = MainAddon.CDsON
 
-	-- Spells and Items (Marksmanship)
 	local S = Spell.Hunter.Marksmanship
 	local I = Item.Hunter.Marksmanship
 
-	-- Exclude list for on-use items (safe default)
 	local OnUseExcludes = {}
 
-	-- Basic GUI config placeholder (keep minimal)
 	local color = '65b346'
 	local Config = {
 		key = 'Lamp_MS_Config',
@@ -51,14 +48,12 @@ local function MyRoutine()
 	}
 	MainAddon.SetCustomConfig(Author, SpecID, Config)
 
-	-- State
 	local BossFightRemains = 11111
 	local FightRemains = 11111
 	local Enemies10y = {}
 	local ActiveEnemies10 = 1
 	local TargetInRange = false
 
-	-- GUI reads/writes Auratimers core toggles
 	local function IsOnEnabled()
 		return MainAddon.MasterON()
 	end
@@ -99,7 +94,6 @@ local function MyRoutine()
 		end
 	end
 
-	-- Event registrations (Aimed Shot + Rapid Fire + Black Arrow/Arcane/Multi Shot)
 	local AimedShotCastTracker = { lastEvent = nil, lastTime = 0, castGUID = nil, prevPshotsValue = nil, prevTshotsValue = nil }
 	HL:RegisterForEvent(function(_, unitTarget, castGUID, spellID)
 		if unitTarget ~= "player" or spellID ~= S.AimedShot:ID() then return end
@@ -176,12 +170,10 @@ local function MyRoutine()
 		end
 	end, "UNIT_SPELLCAST_SUCCEEDED")
 
-	-- Init
 	local function Init()
 		S.AimedShot:RegisterInFlight()
 		MainAddon:Print('LAMP Marksmanship loaded')
 
-		-- Lightweight GUI similar to requested layout
 		if not _G.LAMP_MS_Frame then
 			local frame = CreateFrame("Frame", "LAMP_MS_Frame", UIParent, "BackdropTemplate")
 			frame:SetSize(160, 210)
@@ -194,11 +186,9 @@ local function MyRoutine()
 			frame:SetBackdrop({ bgFile = "Interface/Buttons/WHITE8X8", edgeFile = "Interface/Tooltips/UI-Tooltip-Border", edgeSize = 6 })
 			frame:SetBackdropColor(0.06, 0.06, 0.06, 0.92)
 			frame:SetBackdropBorderColor(0.25, 0.25, 0.25, 1)
-			-- Title
 			frame._title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
 			frame._title:SetPoint("TOP", frame, "TOP", 0, -6)
 			frame._title:SetText("LAMP - Marksmanship")
-			-- Divider under title
 			local divider = frame:CreateTexture(nil, "ARTWORK")
 			divider:SetColorTexture(1, 1, 1, 0.10)
 			divider:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -22)
@@ -210,16 +200,13 @@ local function MyRoutine()
 				btn:SetSize(130, 30)
 				btn:SetPoint("TOP", frame, "TOP", 0, yOffset)
 				btn:SetText(label)
-				-- hide default borders for a flatter style
 				if btn.Left then btn.Left:Hide() end
 				if btn.Middle then btn.Middle:Hide() end
 				if btn.Right then btn.Right:Hide() end
 				local fs = btn:GetFontString() if fs then fs:SetTextColor(1,1,1,1) end
-				-- background texture for state coloring
 				btn._bg = btn:CreateTexture(nil, "BACKGROUND")
 				btn._bg:SetAllPoints(btn)
 				btn._bg:SetColorTexture(0.15, 0.15, 0.15, 0.6)
-				-- hover overlay
 				btn._hover = btn:CreateTexture(nil, "HIGHLIGHT")
 				btn._hover:SetAllPoints(btn)
 				btn._hover:SetColorTexture(1, 1, 1, 0.08)
@@ -297,12 +284,10 @@ local function MyRoutine()
 		FightRemains = 11111
 	end, "PLAYER_REGEN_ENABLED")
 
-	-- Keep Aimed Shot in-flight registration updated when talents/spells change
 	HL:RegisterForEvent(function()
 		S.AimedShot:RegisterInFlight()
 	end, "SPELLS_CHANGED", "LEARNED_SPELL_IN_TAB")
 
-	-- Helpers
 	local function Precombat()
 		if S.HuntersMark:IsReady() and Target:DebuffDown(S.HuntersMarkDebuff, true) then
 			if Cast(S.HuntersMark) then return "hunters_mark precombat LAMP" end
@@ -349,7 +334,6 @@ local function MyRoutine()
 		end
 	end
 
-	-- Action lists inspired by HR structure
 	local function Cleave()
 		if S.ExplosiveShot:IsReady() and (S.PrecisionDetonation:IsAvailable() and Player:PrevGCDP(1, S.AimedShot) and (Player:BuffDown(S.TrueshotBuff) or not S.WindrunnerQuiver:IsAvailable())) then
 			if Cast(S.ExplosiveShot) then return "explosive_shot cleave 1 LAMP" end
@@ -536,7 +520,6 @@ local function MyRoutine()
 		end
 	end
 
-	-- Overrides to match HR behaviors
 	local OldIsCastable
 	OldIsCastable = HL.AddCoreOverride("Spell.IsCastable", function(self, BypassRecovery, Range, AoESpell, ThisUnit, Offset)
 		if self == S.SteadyShot then
@@ -606,7 +589,6 @@ local function MyRoutine()
 	end, 254)
 
 	local function MainAPL()
-		-- Enemies and ranges
 		local splash = Target:GetEnemiesInSplashRange(10)
 		if AoEEnabled() then
 			ActiveEnemies10 = Target:EnemiesAround(10)
@@ -625,7 +607,6 @@ local function MyRoutine()
 			end
 		end
 
-		-- Defensives (basic)
 		if Player:AffectingCombat() then
 			if Spell.Hunter.Commons.Exhilaration:IsCastable() and Player:HealthPercentage() <= (MainAddon.Config.GetClassSetting('exhilaration_spin') or 45) then
 				if Cast(Spell.Hunter.Commons.Exhilaration) then return "Exhilaration LAMP" end
@@ -635,7 +616,6 @@ local function MyRoutine()
 			end
 		end
 
-		-- Out of combat precombat
 		if MainAddon.TargetIsValid() and not Player:AffectingCombat() then
 			local r = Precombat(); if r then return r end
 		end
@@ -649,17 +629,14 @@ local function MyRoutine()
 		if S.ExplosiveShot:CooldownUp() and S.PrecisionDetonation:IsAvailable() and Player:IsCasting(S.AimedShot) and Player:BuffDown(S.TrueshotBuff) and (not S.ShrapnelShot:IsAvailable() or Player:BuffDown(S.LockandLoadBuff)) then
 			if Cast(S.ExplosiveShot) then return "explosive_shot trickshots 1 LAMP" end
 		end
-		-- Force Black Arrow suggestion while casting Aimed Shot (for UI visibility)
 		if Player:IsCasting(S.AimedShot) then
 			if Cast(S.BlackArrow) then return "black_arrow forced while_aimed_cast LAMP" end
 		end
 
-		-- Hunter's Mark on bosses
 		if S.HuntersMark:IsReady() and Target:IsBoss() and Target:DebuffDown(S.HuntersMarkDebuff, true) and Target:TimeToX(80) > 20 then
 			if Cast(S.HuntersMark) then return "Hunter's Mark LAMP" end
 		end
 
-		-- Action list selection (match HR target thresholds)
 		if ActiveEnemies10 > 2 and S.TrickShots:IsAvailable() and S.BlackArrow:IsAvailable() then
 			local r = Trickshots(); if r then return r end
 		end
