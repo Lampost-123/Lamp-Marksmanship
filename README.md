@@ -5,5 +5,5 @@
 2. Extract the contents to your WoW AddOns folder:
    - Retail: `World of Warcraft/_retail_/Interface/AddOns/`
 3. Rename the extracted folder to `Lamp-Marksmanship`.
-4. Start the game or type `/reload` to load the addon.
+4. `/reload` to load the addon.
 5. Select the rotation by right clicking icon.
