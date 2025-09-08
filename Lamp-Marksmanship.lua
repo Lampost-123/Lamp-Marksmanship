@@ -625,23 +625,24 @@ local function MyRoutine()
 			local cr = CDs(); if cr then return cr end
 			local tr = Trinkets(); if tr then return tr end
 		end
+		if MainAddon.TargetIsValid() then
+			if S.ExplosiveShot:CooldownUp() and S.PrecisionDetonation:IsAvailable() and Player:IsCasting(S.AimedShot) and Player:BuffDown(S.TrueshotBuff) and (not S.ShrapnelShot:IsAvailable() or Player:BuffDown(S.LockandLoadBuff)) then
+				if Cast(S.ExplosiveShot) then return "explosive_shot trickshots 1 LAMP" end
+			end
+			if Player:IsCasting(S.AimedShot) then
+				if Cast(S.BlackArrow) then return "black_arrow forced while_aimed_cast LAMP" end
+			end
 
-		if S.ExplosiveShot:CooldownUp() and S.PrecisionDetonation:IsAvailable() and Player:IsCasting(S.AimedShot) and Player:BuffDown(S.TrueshotBuff) and (not S.ShrapnelShot:IsAvailable() or Player:BuffDown(S.LockandLoadBuff)) then
-			if Cast(S.ExplosiveShot) then return "explosive_shot trickshots 1 LAMP" end
-		end
-		if Player:IsCasting(S.AimedShot) then
-			if Cast(S.BlackArrow) then return "black_arrow forced while_aimed_cast LAMP" end
-		end
+			if S.HuntersMark:IsReady() and Target:IsBoss() and Target:DebuffDown(S.HuntersMarkDebuff, true) and Target:TimeToX(80) > 20 then
+				if Cast(S.HuntersMark) then return "Hunter's Mark LAMP" end
+			end
 
-		if S.HuntersMark:IsReady() and Target:IsBoss() and Target:DebuffDown(S.HuntersMarkDebuff, true) and Target:TimeToX(80) > 20 then
-			if Cast(S.HuntersMark) then return "Hunter's Mark LAMP" end
-		end
-
-		if ActiveEnemies10 > 2 and S.TrickShots:IsAvailable() and S.BlackArrow:IsAvailable() then
-			local r = Trickshots(); if r then return r end
-		end
-		if (ActiveEnemies10 < 3 or not S.TrickShots:IsAvailable()) and S.BlackArrow:IsAvailable() then
-			local r = DarkRangerST(); if r then return r end
+			if ActiveEnemies10 > 2 and S.TrickShots:IsAvailable() and S.BlackArrow:IsAvailable() then
+				local r = Trickshots(); if r then return r end
+			end
+			if (ActiveEnemies10 < 3 or not S.TrickShots:IsAvailable()) and S.BlackArrow:IsAvailable() then
+				local r = DarkRangerST(); if r then return r end
+			end
 		end
 	end
 
