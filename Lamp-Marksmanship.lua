@@ -64,6 +64,9 @@ local function MyRoutine()
 		return CDsON()
 	end
 
+	local MovingSince = 0
+	local LastMovingState = false
+
 	-- Trackers (Pshots/Tshots)
 	local Pshots = false
 	local Tshots = false
@@ -598,6 +601,7 @@ local function MyRoutine()
 
 	ShouldAvoidSteadyDueToAimedSoon = function()
 		if Player:FocusP() < S.AimedShot:Cost() then return false end
+		if MovingSince > 0 and (GetTime() - MovingSince) > 0.50 then return false end
 		if PredictedAimedShotReadyTime() <= 0.10 then return true end
 		local timeToAimed = PredictedAimedShotReadyTime()
 		local threshold = Player:GCD() + 0.10
@@ -605,6 +609,18 @@ local function MyRoutine()
 	end
 
 	local function MainAPL()
+		local now = GetTime()
+		local moving = Player:IsMoving() and true or false
+		if moving then
+			if not LastMovingState then
+				MovingSince = now
+				LastMovingState = true
+			end
+		else
+			LastMovingState = false
+			MovingSince = 0
+		end
+
 		local splash = Target:GetEnemiesInSplashRange(10)
 		if AoEEnabled() then
 			ActiveEnemies10 = Target:EnemiesAround(10)
