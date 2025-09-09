@@ -582,23 +582,26 @@ local function MyRoutine()
 		end
 	end, 254)
 
-	PredictedAimedShotReadyTime = function()
+	PredictedAimedShotReadyTime = function(simulateSteadyCast)
 		if S.AimedShot:IsReady() then return 0 end
 		local timeRemaining = S.AimedShot:CooldownRemains()
 		if Pshots and (S.ArcaneShot:IsReady() or S.MultiShot:IsReady() or S.BlackArrow:IsReady()) then
 			timeRemaining = math.max(0, timeRemaining - 1.5)
+		end
+		if simulateSteadyCast then
+			timeRemaining = math.max(0, timeRemaining - (S.SteadyShot:CastTime() + 2.0))
+		elseif Player:IsCasting(S.SteadyShot) then
+			timeRemaining = math.max(0, timeRemaining - 2.0)
 		end
 		return timeRemaining
 	end
 
 	ShouldAvoidSteadyDueToAimedSoon = function()
 		if Player:FocusP() < S.AimedShot:Cost() then return false end
-		if S.AimedShot:IsReady() then return true end
-		local predicted = PredictedAimedShotReadyTime()
-		local steadyCast = S.SteadyShot:CastTime()
-		local steadyCDR = 2.0 
-		local buffer = 0.20 
-		return predicted <= (steadyCast + steadyCDR + buffer)
+		if PredictedAimedShotReadyTime() <= 0.10 then return true end
+		local timeToAimed = PredictedAimedShotReadyTime()
+		local threshold = Player:GCD() + 0.10
+		return timeToAimed <= threshold
 	end
 
 	local function MainAPL()
