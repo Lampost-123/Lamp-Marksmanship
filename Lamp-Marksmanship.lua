@@ -292,12 +292,12 @@ local function MyRoutine()
 		if S.HuntersMark:IsReady() and Target:DebuffDown(S.HuntersMarkDebuff, true) then
 			if Cast(S.HuntersMark) then return "hunters_mark precombat LAMP" end
 		end
-		if S.AimedShot:IsReady() and not Player:IsCasting(S.AimedShot) then
-			if Cast(S.AimedShot) then return "aimed_shot precombat LAMP" end
-		end
-		if S.SteadyShot:IsReady() and not Player:IsCasting(S.AimedShot) then
-			if Cast(S.SteadyShot) then return "steady_shot precombat LAMP" end
-		end
+		-- if S.AimedShot:IsReady() and not Player:IsCasting(S.AimedShot) then
+		-- 	if Cast(S.AimedShot) then return "aimed_shot precombat LAMP" end
+		-- end
+		-- if S.SteadyShot:IsReady() and not Player:IsCasting(S.AimedShot) then
+		-- 	if Cast(S.SteadyShot) then return "steady_shot precombat LAMP" end
+		-- end
 	end
 
 	local function CDs()
@@ -334,6 +334,9 @@ local function MyRoutine()
 		end
 	end
 
+	local PredictedAimedShotReadyTime
+	local ShouldAvoidSteadyDueToAimedSoon
+
 	local function Cleave()
 		if S.ExplosiveShot:IsReady() and (S.PrecisionDetonation:IsAvailable() and Player:PrevGCDP(1, S.AimedShot) and (Player:BuffDown(S.TrueshotBuff) or not S.WindrunnerQuiver:IsAvailable())) then
 			if Cast(S.ExplosiveShot) then return "explosive_shot cleave 1 LAMP" end
@@ -353,7 +356,7 @@ local function MyRoutine()
 		if S.Trueshot:IsReady() and (Tshots and (Player:BuffDown(S.DoubleTapBuff) or not S.Volley:IsAvailable()) and (Player:BuffUp(S.LunarStormCDBuff) or not S.DoubleTap:IsAvailable() or not S.Volley:IsAvailable()) and (Player:BuffDown(S.PreciseShotsBuff) or Player:BuffUp(S.MovingTargetBuff) or not S.Volley:IsAvailable())) then
 			if Cast(S.Trueshot) then return "trueshot cleave 6 LAMP" end
 		end
-		if S.SteadyShot:IsReady() and (S.BlackArrow:IsAvailable() and Player:FocusP() + Player:FocusCastRegen(S.SteadyShot:CastTime()) < Player:FocusMax() - 10 and Player:PrevGCDP(1, S.AimedShot) and Player:BuffDown(S.DeathblowBuff) and Player:BuffDown(S.TrueshotBuff) and S.Trueshot:CooldownDown()) then
+		if S.SteadyShot:IsReady() and (not ShouldAvoidSteadyDueToAimedSoon()) and (S.BlackArrow:IsAvailable() and Player:FocusP() + Player:FocusCastRegen(S.SteadyShot:CastTime()) < Player:FocusMax() - 10 and Player:PrevGCDP(1, S.AimedShot) and Player:BuffDown(S.DeathblowBuff) and Player:BuffDown(S.TrueshotBuff) and S.Trueshot:CooldownDown()) then
 			if Cast(S.SteadyShot) then return "steady_shot cleave 7 LAMP" end
 		end
 		if S.RapidFire:IsReady() and (S.LunarStorm:IsAvailable() and Player:BuffDown(S.LunarStormCDBuff) and (Player:BuffDown(S.PreciseShotsBuff) or Player:BuffUp(S.MovingTargetBuff) or (S.Volley:CooldownDown() and S.Trueshot:CooldownDown()) or not S.Volley:IsAvailable())) then
@@ -389,15 +392,13 @@ local function MyRoutine()
 		if S.BlackArrow:IsReady() and not S.Headshot:IsAvailable() then
 			if Cast(S.BlackArrow) then return "black_arrow cleave 18 LAMP" end
 		end
-		if S.SteadyShot:IsReady() then
+		if S.SteadyShot:IsReady() and (not ShouldAvoidSteadyDueToAimedSoon()) then
 			if Cast(S.SteadyShot) then return "steady_shot cleave 19 LAMP" end
 		end
 	end
 
 	local function DarkRangerST()
-		-- if S.ExplosiveShot:IsReady() and S.PrecisionDetonation:IsAvailable() and Player:PrevGCDP(1, S.AimedShot) and Player:BuffDown(S.TrueshotBuff) and Player:BuffDown(S.LockandLoadBuff) then
-		-- 	if Cast(S.ExplosiveShot) then return "explosive_shot drst 1 LAMP" end
-		-- end
+
 		if S.Trueshot:IsReady() and Tshots and Player:BuffDown(S.DoubleTapBuff) and not S.BlackArrow:IsReady() then
 			if Cast(S.Trueshot) then return "trueshot drst 7 LAMP" end
 		end
@@ -425,10 +426,7 @@ local function MyRoutine()
 		if S.AimedShot:IsReady() and ((not Pshots) or (Target:DebuffUp(S.SpottersMarkDebuff) and Player:BuffUp(S.MovingTargetBuff))) then
 			if Cast(S.AimedShot) then return "aimed_shot drst 9 LAMP" end
 		end
-		-- if S.ExplosiveShot:IsReady() and S.ShrapnelShot:IsAvailable() and Player:BuffDown(S.LockandLoadBuff) then
-		-- 	if Cast(S.ExplosiveShot) then return "explosive_shot drst 10 LAMP" end
-		-- end
-		if S.SteadyShot:IsReady() then
+		if S.SteadyShot:IsReady() and (not ShouldAvoidSteadyDueToAimedSoon()) then
 			if Cast(S.SteadyShot) then return "steady_shot drst 11 LAMP" end
 		end
 	end
@@ -464,7 +462,7 @@ local function MyRoutine()
 		if S.ExplosiveShot:IsReady() and (S.PrecisionDetonation:IsAvailable() or Player:BuffDown(S.TrueshotBuff)) then
 			if Cast(S.ExplosiveShot) then return "explosive_shot sentst 10 LAMP" end
 		end
-		if S.SteadyShot:IsReady() then
+		if S.SteadyShot:IsReady() and (not ShouldAvoidSteadyDueToAimedSoon()) then
 			if Cast(S.SteadyShot) then return "steady_shot sentst 11 LAMP" end
 		end
 	end
@@ -503,21 +501,17 @@ local function MyRoutine()
 		if S.RapidFire:IsReady() and Tshots and (not S.BlackArrow:IsAvailable() or Player:BuffDown(S.DeathblowBuff)) and (not S.NoScope:IsAvailable() or Target:DebuffDown(S.SpottersMarkDebuff)) and (S.NoScope:IsAvailable() or Player:BuffDown(S.BulletstormBuff)) then
 			if Cast(S.RapidFire) then return "rapid_fire trickshots 11 LAMP" end
 		end
-		-- if S.ExplosiveShot:IsReady() and S.PrecisionDetonation:IsAvailable() and S.ShrapnelShot:IsAvailable() and Player:BuffDown(S.LockandLoadBuff) and ((not Pshots) or (Target:DebuffUp(S.SpottersMarkDebuff) and Player:BuffUp(S.MovingTargetBuff))) then
-		-- 	if Cast(S.ExplosiveShot) then return "explosive_shot trickshots 12 LAMP" end
-		-- end
+
 		if S.AimedShot:IsReady() and ((not Pshots) or (Target:DebuffUp(S.SpottersMarkDebuff) and Player:BuffUp(S.MovingTargetBuff))) and Tshots then
 			if Cast(S.AimedShot) then return "aimed_shot trickshots 13 LAMP" end
 		end
 		if S.ExplosiveShot:IsReady() and not S.ShrapnelShot:IsAvailable() then
 			if Cast(S.ExplosiveShot) then return "explosive_shot trickshots 14 LAMP" end
 		end
-		if S.SteadyShot:IsReady() and Player:FocusP() + Player:FocusCastRegen(S.SteadyShot:CastTime()) < Player:FocusMax() then
+		if S.SteadyShot:IsReady() and (not ShouldAvoidSteadyDueToAimedSoon()) and Player:FocusP() + Player:FocusCastRegen(S.SteadyShot:CastTime()) < Player:FocusMax() then
 			if Cast(S.SteadyShot) then return "steady_shot trickshots 15 LAMP" end
 		end
-		if S.MultiShot:IsReady() then
-			if Cast(S.MultiShot) then return "multishot trickshots 16 LAMP" end
-		end
+
 	end
 
 	local OldIsCastable
@@ -587,6 +581,25 @@ local function MyRoutine()
 			end
 		end
 	end, 254)
+
+	PredictedAimedShotReadyTime = function()
+		if S.AimedShot:IsReady() then return 0 end
+		local timeRemaining = S.AimedShot:CooldownRemains()
+		if Pshots and (S.ArcaneShot:IsReady() or S.MultiShot:IsReady() or S.BlackArrow:IsReady()) then
+			timeRemaining = math.max(0, timeRemaining - 1.5)
+		end
+		return timeRemaining
+	end
+
+	ShouldAvoidSteadyDueToAimedSoon = function()
+		if Player:FocusP() < S.AimedShot:Cost() then return false end
+		if S.AimedShot:IsReady() then return true end
+		local predicted = PredictedAimedShotReadyTime()
+		local steadyCast = S.SteadyShot:CastTime()
+		local steadyCDR = 2.0 
+		local buffer = 0.20 
+		return predicted <= (steadyCast + steadyCDR + buffer)
+	end
 
 	local function MainAPL()
 		local splash = Target:GetEnemiesInSplashRange(10)
