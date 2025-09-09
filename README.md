@@ -1,4 +1,4 @@
-
+- ONLY SUPPORTS DARK RAGER.
 - When swapping to Marksmanship for the first time, disable pets in the class settings before swapping rotations.
 
 1. Download or clone this repository.
